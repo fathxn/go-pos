@@ -2,7 +2,9 @@ package main
 
 import (
 	"go-pos/internal/config"
-	"go-pos/internal/infra/database"
+	"go-pos/internal/server"
+	"log/slog"
+	"os"
 )
 
 func main() {
@@ -11,12 +13,14 @@ func main() {
 		panic(err)
 	}
 
-	cfg := config.GetConfig()
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	})
 
-	db, err := database.ConnectPostgres(cfg.DB)
-	if err != nil {
+	log := slog.New(logHandler)
+	slog.SetDefault(log)
+
+	if err := server.Start(); err != nil {
 		panic(err)
 	}
-
-	_ = db
 }
